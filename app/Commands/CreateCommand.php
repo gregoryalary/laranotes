@@ -4,7 +4,8 @@ namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
-use Illuminate\Support\Facades\Storage;
+
+use NoteStorage;
 
 class CreateCommand extends Command
 {
@@ -29,15 +30,15 @@ class CreateCommand extends Command
      */
     public function handle()
     {
-        $savedNotes  = Storage::exists('notes.json')
-                     ? json_decode(Storage::get('notes.json'))
-                     : [];
-        $savedNotes  = empty($savedNotes) ? [] : $savedNotes;
+        $savedNotes  = NoteStorage::retrieve();
         $noteContent = implode($this->argument('noteContent'), ' ');
         
-        array_push($savedNotes, $noteContent);
+        array_push($savedNotes, [
+            'content' => $noteContent,
+            'done'    => false
+        ]);
         $this->task('Saving the note "'.$noteContent.'"', function () use ($savedNotes) {
-            return Storage::put('notes.json', json_encode($savedNotes));;
+            NoteStorage::save($savedNotes);
         });
     }
     

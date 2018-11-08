@@ -4,7 +4,8 @@ namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
-use Illuminate\Support\Facades\Storage;
+
+use NoteStorage;
 
 class AllCommand extends Command
 {
@@ -29,16 +30,18 @@ class AllCommand extends Command
      */
     public function handle()
     {
-        $savedNotes  = Storage::exists('notes.json')
-                     ? json_decode(Storage::get('notes.json'))
-                     : [];
+        $savedNotes = NoteStorage::retrieve();
 
         if (empty($savedNotes)) {
             $this->comment('No notes saved.');
         } else {
             $this->info('');
             for ($index = 0; $index < count($savedNotes); $index++) {
-                $this->info('  '.($index + 1).'. '.$savedNotes[$index]);
+                if ($savedNotes[$index]->done) {
+                    $this->info('  '.($index + 1).'. ✓ '.$savedNotes[$index]->content);
+                } else {
+                    $this->info('  '.($index + 1).'. □ '.$savedNotes[$index]->content);
+                }
             }
         }
     }

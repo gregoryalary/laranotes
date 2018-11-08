@@ -56,4 +56,7 @@ return [
         App\Providers\AppServiceProvider::class,
     ],
 
+    'aliases' => [
+        'NoteStorage' => App\Helpers\NoteStorage::class,
+    ]
 ];

@@ -4,7 +4,8 @@ namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
-use Illuminate\Support\Facades\Storage;
+
+use NoteStorage;
 
 class DeleteCommand extends Command
 {
@@ -29,17 +30,14 @@ class DeleteCommand extends Command
      */
     public function handle()
     {
-        $savedNotes  = Storage::exists('notes.json')
-                     ? json_decode(Storage::get('notes.json'))
-                     : [];
-        $savedNotes  = empty($savedNotes) ? [] : $savedNotes;
+        $savedNotes = NoteStorage::retrieve(); 
 
-        $option = $this->menu('Delete menu', $savedNotes)->open();
+        $option = $this->menu('Delete menu', array_column($savedNotes, 'content'))->open();
 
         if (isset($option)) {
             array_splice($savedNotes, $option, 1);
             $this->task('Re-indexing the notes', function () use ($savedNotes) {
-                return Storage::put('notes.json', json_encode($savedNotes));;
+                NoteStorage::save($savedNotes); 
             });
         }  
     }
