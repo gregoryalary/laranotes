@@ -31,17 +31,31 @@ class AllCommand extends Command
     public function handle()
     {
         $savedNotes = NoteStorage::retrieve();
+        $tags       = array_unique(array_column($savedNotes, 'tag'));
+        $sortedTags = array_fill_keys($tags, []);
+
+        foreach ($tags as $tag) {
+            for ($notesIndex = 0; $notesIndex < count($savedNotes); $notesIndex++) {
+                if ($savedNotes[$notesIndex]->tag === $tag) {
+                    array_push($sortedTags[$tag], json_decode(json_encode($savedNotes[$notesIndex])));
+                }
+            }
+        }
 
         if (empty($savedNotes)) {
             $this->comment('No notes saved.');
         } else {
-            $this->info('');
-            for ($index = 0; $index < count($savedNotes); $index++) {
-                if ($savedNotes[$index]->done) {
-                    $this->info('  '.($index + 1).'. ✓ '.$savedNotes[$index]->content);
-                } else {
-                    $this->info('  '.($index + 1).'. □ '.$savedNotes[$index]->content);
+            $this->line('');
+            foreach ($sortedTags as $tag => $notes) {
+                $this->comment('  '.$tag.' :');
+                foreach ($notes as $note) {
+                    if ($note->done) {
+                        $this->info('    '.$note->id.'. ✓ '.$note->content);
+                    } else {
+                        $this->info('    '.$note->id.'. □ '.$note->content);
+                    }
                 }
+                $this->line('');
             }
         }
     }

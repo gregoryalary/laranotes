@@ -30,13 +30,23 @@ class UncheckCommand extends Command
      */
     public function handle()
     {
-        $savedNotes = NoteStorage::retrieve(); 
-        $id         = intval($this->argument('id')) - 1;
-        if ($id < 0 || $id >= count($savedNotes)) {
+        $savedNotes  = NoteStorage::retrieve(); 
+        $id          = intval($this->argument('id'));
+        $found       = false;
+        $noteContent = "";
+
+        for ($index = 0; $index < count($savedNotes) && !$found; $index++) {
+            if ($savedNotes[$index]->id == $id) {
+                $savedNotes[$index]->done = false;
+                $found = true;
+                $noteContent = $savedNotes[$index]->content;
+            }
+        }
+
+        if (!$found) {
             $this->comment('No note found with the id '.$this->argument('id'));
         } else {
-            $savedNotes[$id]->done = false;
-            $this->task('Unchecking the note "'.$savedNotes[$id]->content.'"', function () use ($savedNotes) {
+            $this->task('Unchecking the note "'.$noteContent.'"', function () use ($savedNotes) {
                 NoteStorage::save($savedNotes); 
             });
         }

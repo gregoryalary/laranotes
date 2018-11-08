@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Storage;
 
 class NoteStorage
 {
+
+    private static $lastId;
+
     public static function retrieve()
     {
         $savedNotes = Storage::exists('notes.json')
@@ -18,4 +21,5 @@ class NoteStorage
     {
         return Storage::put('notes.json', json_encode($notes));
     }
+
 }

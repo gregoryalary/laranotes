@@ -14,7 +14,7 @@ class DeleteCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'delete';
+    protected $signature = 'delete {id : the id of the note to uncheck}';
 
     /**
      * The description of the command.
@@ -30,16 +30,29 @@ class DeleteCommand extends Command
      */
     public function handle()
     {
-        $savedNotes = NoteStorage::retrieve(); 
+        $savedNotes  = NoteStorage::retrieve(); 
+        $id          = intval($this->argument('id'));
+        $found       = false;
+        $deleteIndex = -1;
+        $noteContent = "";
 
-        $option = $this->menu('Delete menu', array_column($savedNotes, 'content'))->open();
+        for ($index = 0; $index < count($savedNotes) && !$found; $index++) {
+            if ($savedNotes[$index]->id == $id) {
+                $savedNotes[$index]->done = true;
+                $found = true;
+                $noteContent = $savedNotes[$index]->content;
+                $deleteIndex = $index;
+            }
+        }
 
-        if (isset($option)) {
-            array_splice($savedNotes, $option, 1);
-            $this->task('Re-indexing the notes', function () use ($savedNotes) {
+        if (!$found) {
+            $this->comment('No note found with the id '.$this->argument('id'));
+        } else {
+            array_splice($savedNotes, $deleteIndex, 1);
+            $this->task('Deleting the note "'.$noteContent.'"', function () use ($savedNotes) {
                 NoteStorage::save($savedNotes); 
             });
-        }  
+        }
     }
 
 }
