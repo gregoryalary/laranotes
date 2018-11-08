@@ -50,7 +50,7 @@ class AllCommand extends Command
             $this->line('');
             foreach ($sortedTags as $tag => $notes) {
                 if ($tagFilter && !in_array($tag, $this->option('tag'))) continue;
-                $this->comment('  '.$tag.' :');
+                $this->comment('  #'.$tag.' :');
                 foreach ($notes as $note) {
                     $onePrinted = true;
                     if ($note->done) {
