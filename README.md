@@ -4,6 +4,6 @@ Laranotes is a simple command line application that let you create, list and del
 
 ## Demo
 
-
+![](https://raw.githubusercontent.com/gregoryalary/laranotes/master/demo/demo.gif)
 
 ## Installation
