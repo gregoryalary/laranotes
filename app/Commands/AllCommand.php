@@ -14,7 +14,7 @@ class AllCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'all';
+    protected $signature = 'all {--tag=* : The tags to display}';
 
     /**
      * The description of the command.
@@ -33,6 +33,8 @@ class AllCommand extends Command
         $savedNotes = NoteStorage::retrieve();
         $tags       = array_unique(array_column($savedNotes, 'tag'));
         $sortedTags = array_fill_keys($tags, []);
+        $tagFilter  = count($this->option('tag')) > 0;
+        $onePrinted = false;
 
         foreach ($tags as $tag) {
             for ($notesIndex = 0; $notesIndex < count($savedNotes); $notesIndex++) {
@@ -47,8 +49,10 @@ class AllCommand extends Command
         } else {
             $this->line('');
             foreach ($sortedTags as $tag => $notes) {
+                if ($tagFilter && !in_array($tag, $this->option('tag'))) continue;
                 $this->comment('  '.$tag.' :');
                 foreach ($notes as $note) {
+                    $onePrinted = true;
                     if ($note->done) {
                         $this->info('    '.$note->id.'. ✓ '.$note->content);
                     } else {
@@ -56,6 +60,9 @@ class AllCommand extends Command
                     }
                 }
                 $this->line('');
+            }
+            if (!$onePrinted) {
+                $this->comment('No notes saved for the specified tags.');
             }
         }
     }
